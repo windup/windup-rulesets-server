@@ -54,17 +54,17 @@ public class ServerIdentRules extends AbstractRuleProvider
             .perform(new AbstractIterationOperation<ServerDirModel>() {
                     @Override
                     public void perform(GraphRewrite event, EvaluationContext context, ServerDirModel serverDirM) {
-                        log.info("Recognizing server: " + serverDirM.getFilePath());
+                        log.info("Recognizing server: " + serverDirM.getFullPath());
 
                         try {
-                            ServerIdentification info = recognizer.recognize(new File(serverDirM.getFilePath()));
+                            ServerIdentification info = recognizer.recognize(new File(serverDirM.getFullPath()));
                             if (info == null)
                             {
                                 log.info("No server recognized.");
                                 return;
                             }
 
-                            log.info("\tServer in " + serverDirM.getFilePath() + " identified as: " + info.toStringFormatted());
+                            log.info("\tServer in " + serverDirM.getFullPath() + " identified as: " + info.toStringFormatted());
                             ServerIdentModel identM = serverIdentGS.create()
                                 // E.g. JBoss
                                 .setVendor(info.getVendor())
@@ -75,7 +75,7 @@ public class ServerIdentRules extends AbstractRuleProvider
                             identM.setIdentifies(serverDirM);
                         }
                         catch (Exception ex) {
-                            log.log(Level.SEVERE, "Error when recognizing " + serverDirM.getFilePath() + ": " + ex.getMessage(), ex);
+                            log.log(Level.SEVERE, "Error when recognizing " + serverDirM.getFullPath() + ": " + ex.getMessage(), ex);
                         }
                         serverIdentGS.commit();
                     }

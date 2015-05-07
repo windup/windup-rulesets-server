@@ -50,7 +50,7 @@ public class ServerIdentInitRules extends AbstractRuleProvider
                 {
                     Map<String, Object> config = grCtx.getOptionMap();
                     String serverDir = (String) config.get(ServerDirOption.NAME);
-                    serverDirGS.create().setFilePath(serverDir);
+                    serverDirGS.create().setFullPath(serverDir);
                     log.finer("Added server dir: " + serverDir);
                 }
             }

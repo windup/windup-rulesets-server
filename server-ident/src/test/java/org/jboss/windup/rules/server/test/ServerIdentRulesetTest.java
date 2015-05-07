@@ -86,9 +86,9 @@ public class ServerIdentRulesetTest
             {
                 final ServerIdentModel identM = serverDirM.getIdentification();
                 if (null == identM)
-                    Assert.fail("Server was not identified: " + serverDirM.getFilePath());
+                    Assert.fail("Server was not identified: " + serverDirM.getFullPath());
 
-                log.info(serverDirM.getFilePath() + " identified as " + identM);
+                log.info(serverDirM.getFullPath() + " identified as " + identM);
                 Assert.assertEquals("Identified as EAP 5.2.0: " + identM, "EAP", identM.getModel());
                 Assert.assertEquals("Identified as EAP 5.2.0: " + identM, "5.2.0.GA (5.2.0)", identM.getVersion());
                 Assert.assertEquals("Identified as EAP 5.2.0: " + identM, "JBoss", identM.getVendor());
