@@ -17,12 +17,12 @@ public interface ServerRecognizer
      *  Returns (null, null) if it can't recognize the version.
      *  Upper limit may be unset.
      */
-    public VersionRange recognizeVersion( File homeDir );
+    public VersionRange recognizeVersion();
 
     /**
      *  Returns true if server of this type is detected in the directory (used as a home dir, not searched).
      */
-    public boolean isCanRecognizeDir( File serverRootDir );
+    public boolean canRecognizeDir();
 
 
     /**
@@ -32,6 +32,6 @@ public interface ServerRecognizer
     public String format( VersionRange versionRange );
 
 
-    public ServerIdentification recognize(File serverRootDir);
+    public ServerIdentification recognize();
 
 }// class

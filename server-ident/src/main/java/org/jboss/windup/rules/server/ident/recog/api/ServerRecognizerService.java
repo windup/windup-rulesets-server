@@ -21,15 +21,15 @@ import org.jboss.windup.rules.server.ident.recog.as7.JBossAS7ServerRecognizer;
 public class ServerRecognizerService {
     public static final Logger log = Logger.getLogger(ServerRecognizerService.class.getName());
 
-    @Inject private Instance<ServerRecognizer> recognizerInstances;
+    @Inject private Instance<ServerRecognizerFactory> recognizerInstances;
 
-    private Set<ServerRecognizer> recognizers = new HashSet<>();
+    private Set<ServerRecognizerFactory> recognizers = new HashSet<>();
 
 
     private void transferRecognizers()
     {
         if (this.recognizerInstances != null)
-            for (ServerRecognizer recognizerInstance : recognizerInstances)
+            for (ServerRecognizerFactory recognizerInstance : recognizerInstances)
                 this.recognizers.add(recognizerInstance);
     }
 
@@ -37,40 +37,20 @@ public class ServerRecognizerService {
     /**
      *  Ask all known implementations of ServerRecognizer whether their server is in the directory.
      */
-    public /*static*/ ServerRecognizer selectAppropriateRecognizer( File serverRootDir ) throws Exception
+    public ServerRecognizer selectAppropriateRecognizer( File serverRootDir ) throws Exception
     {
-        /* ///
-        for( Class<? extends ServerRecognizer> recognizerClass : findServerRecognizerClasses() ){
-            log.fine("    Trying " + recognizerClass.getSimpleName());
-            ServerRecognizer recognizer = instantiate(recognizerClass);
-            if( recognizer.isCanRecognizeDir(serverRootDir) )
-                return recognizer;
-        }
-        /**/
-
         transferRecognizers();
 
-        for(ServerRecognizer recognizer : recognizers)
+        for(ServerRecognizerFactory recognizerFactory : recognizers)
         {
-            log.fine("    Trying " + recognizer.getClass().getSimpleName());
-            System.out.println("Trying " + recognizer.getClass().getSimpleName());///
-            if( recognizer.isCanRecognizeDir(serverRootDir) )
-                return recognizer;
+            log.fine("    Trying " + recognizerFactory.getClass().getSimpleName());
+            ServerRecognizer serverRecognizer = recognizerFactory.withServerRoot(serverRootDir);
+            if(serverRecognizer.canRecognizeDir() )
+                return serverRecognizer;
         }
         return null;
     }
 
-    /**
-     *  Asks given ServerRecognizer what version is in the given directory.
-     *  TODO: Make method of ServerRecognizer?
-     *  @deprecated  Use IServerType.recognizeVersion();
-     */
-    private VersionRange recognizeVersion( Class<? extends ServerRecognizer> typeClass, File serverRootDir ) throws Exception
-    {
-        ServerRecognizer type = instantiate( typeClass );
-        return type.recognizeVersion( serverRootDir );
-        // TODO: Could be called statically?
-    }
 
     /**
      *  All-in-one: Queries all recognizers which one can recognize given directory;
@@ -80,14 +60,10 @@ public class ServerRecognizerService {
         ServerRecognizer recognizer = selectAppropriateRecognizer( serverRootDir );
         if( recognizer == null )
         {
-            System.out.println("No recognizer found for this server.");///
+            log.warning("No recognizer found for this server.");
             return null;
         }
-        /*return new ServerIdentification(serverRootDir) ///
-                .setRecognizer(recognizer)
-                .setVersionRange(recognizer.recognizeVersion(serverRootDir));
-        /**/
-        return recognizer.recognize(serverRootDir);
+        return recognizer.recognize();
     }
 
 
@@ -102,21 +78,7 @@ public class ServerRecognizerService {
         );
     }
 
-
-    /**
-     *  Just wraps the potential exception.
-     */
-    private static ServerRecognizer instantiate( Class<? extends ServerRecognizer> typeClass ) throws Exception {
-        try {
-            return typeClass.newInstance();
-        } catch( InstantiationException | IllegalAccessException ex ) {
-            throw new Exception("Failed instantiating ServerType "+typeClass.getSimpleName()+": " + ex.getMessage(), ex);
-        }
-    }
-
-
-
-    public ServerRecognizerService addRecognizer(ServerRecognizer recognizer)
+    public ServerRecognizerService addRecognizer(ServerRecognizerFactory recognizer)
     {
         this.recognizers.add(recognizer);
         return this;
