@@ -7,9 +7,9 @@ public class HashFileInfo
     private String version;
 
 
-    public HashFileInfo(String fName, String version)
+    public HashFileInfo(String path, String version)
     {
-        this.path = fName;
+        this.path = path;
         this.version = version;
     }
 

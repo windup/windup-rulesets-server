@@ -26,7 +26,7 @@ public class ServerIdentification
 
 
     /**
-     * Model of the server - e.g. EAP, AS, WildFly.
+     * Vendor of the server - e.g. Oracle, Red Hat, IBM.
      */
     private String vendor;
 

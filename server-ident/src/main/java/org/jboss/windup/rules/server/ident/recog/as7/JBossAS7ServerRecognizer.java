@@ -33,21 +33,21 @@ public class JBossAS7ServerRecognizer extends ServerRecognizerBase implements Se
 
 
     @Override
-    public VersionRange recognizeVersion( File homeDir ) {
-        if( isCanRecognizeDir( homeDir ) )
+    public VersionRange recognizeVersion(  ) {
+        if( isCanRecognizeDir( getServerRootDir() ) )
             return new VersionRange( "7.0.0", null );
         return new VersionRange();
     }
 
 
     @Override
-    public boolean isCanRecognizeDir( File homeDir )
+    public boolean canRecognizeDir)
     {
-        if( ! new File(homeDir, "jboss-modules.jar").exists() )
+        if( ! new File(getServerRootDir(), "jboss-modules.jar").exists() )
             return false;
-        if( ! new File(homeDir, "standalone/configuration").exists() )
+        if( ! new File(getServerRootDir(), "standalone/configuration").exists() )
             return false;
-        if( ! new File(homeDir, "bin/standalone.sh").exists() )
+        if( ! new File(getServerRootDir(), "bin/standalone.sh").exists() )
             return false;
 
         return true;

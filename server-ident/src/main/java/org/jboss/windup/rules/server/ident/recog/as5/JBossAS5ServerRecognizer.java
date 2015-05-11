@@ -56,13 +56,13 @@ public class JBossAS5ServerRecognizer extends ServerRecognizerBase implements  H
      * First checks jar-versions.xml. If that's not present, then compares checksums of all jars.
      */
     @Override
-    public VersionRange recognizeVersion( File homeDir )
+    public VersionRange recognizeVersion()
     {
-        if( ! isCanRecognizeDir( homeDir ) )
+        if( ! isCanRecognizeDir( getServerRootDir() ) )
             return new VersionRange();
 
         // Check jar-versions.xml.
-        File jarVersionsFile = new File( homeDir, JAR_VERSIONS_XML );
+        File jarVersionsFile = new File( getServerRootDir(), JAR_VERSIONS_XML );
         try {
             // Check if we know that file's CRC32; if so, use that version.
             long jarVerCrc = FileHashComparer.computeCrc32(jarVersionsFile);
@@ -87,8 +87,8 @@ public class JBossAS5ServerRecognizer extends ServerRecognizerBase implements  H
             try {
                 InputStream is = this.getClass().getResourceAsStream(hashFile.getPath());
 
-                ComparisonResult result = FileHashComparer.compareHashesAndDir( is, homeDir, filter );
-                log.finer(String.format("   Comparison of .jar's in %s against %s: %d of %d match.", homeDir.getPath(), hashFile.getPath(),
+                ComparisonResult result = FileHashComparer.compareHashesAndDir( is, getServerRootDir(), filter );
+                log.finer(String.format("   Comparison of .jar's in %s against %s: %d of %d match.", getServerRootDir().getPath(), hashFile.getPath(),
                         result.getCountMatches(), result.getCountTotal() ));
                 int curMismatches = result.getCountMismatches();
                 if( curMismatches < minMismatches){
@@ -97,7 +97,7 @@ public class JBossAS5ServerRecognizer extends ServerRecognizerBase implements  H
                 }
             }
             catch( IOException ex ) {
-                throw new RuntimeException("Failed comparing dir " + homeDir.getPath() + " against hashfile " + hashFile.getPath() + ": " + ex.getMessage(), ex);
+                throw new RuntimeException("Failed comparing dir " + getServerRootDir().getPath() + " against hashfile " + hashFile.getPath() + ": " + ex.getMessage(), ex);
             }
         }
 
@@ -112,13 +112,13 @@ public class JBossAS5ServerRecognizer extends ServerRecognizerBase implements  H
 
     // TODO: Move to annotations and base class.
     @Override
-    public boolean isCanRecognizeDir( File homeDir )
+    public boolean isCanRecognizeDir( )
     {
-        if( ! new File(homeDir, JAR_VERSIONS_XML).exists() )
+        if( ! new File(getServerRootDir(), JAR_VERSIONS_XML).exists() )
             return false;
-        if( ! new File(homeDir, "bin/run.sh").exists() )
+        if( ! new File(getServerRootDir(), "bin/run.sh").exists() )
             return false;
-        if( ! new File(homeDir, "lib/jboss-main.jar").exists() )
+        if( ! new File(getServerRootDir(), "lib/jboss-main.jar").exists() )
             return false;
 
         return true;
@@ -158,7 +158,7 @@ public class JBossAS5ServerRecognizer extends ServerRecognizerBase implements  H
 
 
     @Override
-    public ComparisonResult compareHashes(Version version, File serverRootDir) throws Exception
+    public ComparisonResult compareHashes(Version version) throws Exception
     {
         if( version.getVerProduct() == null )
             throw new Exception("Comparing file hashes is only supported for EAP, not AS. Supplied version was: " + version.getVerProject());
@@ -168,11 +168,11 @@ public class JBossAS5ServerRecognizer extends ServerRecognizerBase implements  H
             throw new Exception("No hash files for EAP version: " + version.getVerProduct());
         try
         {
-            return FileHashComparer.compareHashesAndDir(hashFile, serverRootDir, null);
+            return FileHashComparer.compareHashesAndDir(hashFile, getServerRootDir(), null);
         }
         catch( Exception ex )
         {
-            String msg = String.format("Failed comparing hashes of %s against dir %s:%n    ", this.format(version), serverRootDir);
+            String msg = String.format("Failed comparing hashes of %s against dir %s:%n    ", this.format(version), getServerRootDir());
             throw new Exception(msg + ex.getMessage(), ex);
         }
     }

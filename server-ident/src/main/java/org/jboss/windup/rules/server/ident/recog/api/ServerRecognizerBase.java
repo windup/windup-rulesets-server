@@ -4,18 +4,17 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.tools.ant.taskdefs.condition.Equals;
 import org.jboss.windup.rules.server.ident.recog.as5.HashFile;
 import org.jboss.windup.rules.server.ident.recog.as5.HashFileInfo;
 
 /**
- *
+ *  Basic implementation of the recognizer
  *  @author Ondrej Zizka, ozizka at redhat.com
  */
-public abstract class ServerRecognizerBase implements ServerRecognizer
+public abstract class ServerRecognizerBase implements ServerRecognizer, ServerRecognizerFactory
 {
     private ServerRecognizerInfo descriptor;
-
+    private File serverRootDir;
 
     public ServerRecognizerBase()
     {
@@ -26,15 +25,24 @@ public abstract class ServerRecognizerBase implements ServerRecognizer
                 + ServerRecognizerInfo.class.getSimpleName() + " annotation: " + this.getClass().getName());
     }
 
+    @Override
+    public ServerRecognizer withServerRoot(File serverRoot) {
+        this.serverRootDir = serverRoot;
+        return this;
+    }
+
+    public File getServerRootDir() {
+        return serverRootDir;
+    }
 
     @Override
-    public ServerIdentification recognize(File serverRootDir)
+    public ServerIdentification recognize()
     {
         return new ServerIdentification(serverRootDir)
             .setRecognizer(this)
             .setVendor(this.getVendor())
             .setModel(this.getModel())
-            .setVersionRange(this.recognizeVersion(serverRootDir));
+            .setVersionRange(this.recognizeVersion());
     }
 
 
@@ -66,10 +74,10 @@ public abstract class ServerRecognizerBase implements ServerRecognizer
 
 
     @Override
-    public boolean isCanRecognizeDir( File rootDir )
+    public boolean isCanRecognizeDir()
     {
         for (String mustHave : this.descriptor.mustHave())
-            if( ! new File(rootDir, mustHave).exists() )
+            if( ! new File(serverRootDir, mustHave).exists() )
                 return false;
 
         return true;
